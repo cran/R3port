@@ -4,9 +4,21 @@
 \alias{html_plot}
 \title{Prints a R plot to a HTML file or console}
 \usage{
-html_plot(plot, out, title = "plot", titlepr = NULL, footnote = "",
-  pwidth = 1000, pheight = 600, res = NULL, fontsize = 12,
-  units = "px", rawout = paste0(out, ".rawhtml"), ...)
+html_plot(
+  plot,
+  out,
+  title = "plot",
+  titlepr = NULL,
+  footnote = "",
+  pwidth = 1000,
+  pheight = 600,
+  res = NULL,
+  fontsize = 12,
+  units = "px",
+  rawout = paste0(out, ".rawhtml"),
+  cleancur = FALSE,
+  ...
+)
 }
 \arguments{
 \item{plot}{plot object or function call that creates plot to be printed to file}
@@ -31,6 +43,8 @@ html_plot(plot, out, title = "plot", titlepr = NULL, footnote = "",
 
 \item{rawout}{character string with the name of the raw HTML file to generate (e.g. only plotting code)
 In case NULL no raw output will be generated. In order to combine results the filename should end in .raw.html}
+
+\item{cleancur}{logical indicating if the available plots should be deleted before creating new ones}
 
 \item{...}{additional arguments passed through to \code{\link{html_doc}}. Most important are template, rendlist, css and show}
 }

@@ -5,9 +5,10 @@
 #'
 #' @param plot plot object or function call that creates plot to be printed to file
 #' @param out filename for the output latex file
-#' @param title character string to define the title of the table which will be added to the caption
-#' @param titlepr character string to define the prefix of the table title. Can be used to create custom table numbering
+#' @param title character string to define the title of the plot which will be added to the caption
+#' @param titlepr character string to define the prefix of the title. Can be used to create custom numbering
 #' @param footnote character string with the footnote to be placed in the footer of the page (LaTeX coding can be used for example to create line breaks)
+#' @param plotnote character string with the plot note to be placed directly below the plot (LaTeX coding can be used for example to create line breaks)
 #' @param lwidth character string indicating the width of the plot within latex (e.g. "\\\\linewidth")
 #' @param pwidth numeric indicating the width of the plot to be generated in inches or pixels (for respectively the extensions pdf and png)
 #' @param pheight numeric indicating the height of the plot to be generated in inches or pixels (for respectively the extensions pdf and png)
@@ -19,6 +20,10 @@
 #' @param rawout character string with the name of the raw latex file to generate (e.g. only plot code with no preamble and document ending)
 #'    In case NULL no raw output will be generated. In order to combine results the filename should end in .rawtex
 #' @param linebreak logical indicating if a linebreak (clearpage) should be given after a plot
+#' @param label character with the label to add after the caption for referencing the table in text
+#' @param captpl character with the caption placement, can be either "top" or "bottom"
+#' @param rotate logical indicating if the resulting figure should be rotated 90 degrees clockwise
+#' @param cleancur logical indicating if the available plots should be deleted before creating new ones
 #' @param ... additional arguments passed through to \code{\link{ltx_doc}}. Most important are template, rendlist, compile and show
 #'
 #' @return The function returns a latex file (or writes output to console)
@@ -44,13 +49,20 @@
 #'   ltx_plot(plot(rnorm(1e6)),out=tempfile(fileext=".tex"),
 #'            outfmt="png",pwidth=2000,pheight=1200)
 #' }
-ltx_plot <- function(plot,out,title="plot",titlepr=NULL,footnote="",lwidth=NULL,pwidth=10,pheight=5.5,res=NULL,hyper=TRUE,outfmt="pdf",
-                     fontsize=12,units="px",rawout=paste0(out,".rawtex"),linebreak=TRUE,...){
+ltx_plot <- function(plot,out,title="plot",titlepr=NULL,footnote="",plotnote="",lwidth=NULL,pwidth=10,pheight=5.5,res=NULL,hyper=TRUE,outfmt="pdf",
+                     fontsize=12,units="px",rawout=paste0(out,".rawtex"),linebreak=TRUE,label=NULL,captpl="top",rotate=FALSE,cleancur=FALSE,...){
   if(is.null(out)|out=="") stop("A valid name for the output should be specified")
 
   # Set logics for option system
   if(!is.null(getOption('pwidth')))   pwidth   <- getOption('pwidth')
   if(!is.null(getOption('pheight')))  pheight  <- getOption('pheight')
+
+  # Delete figure files when specified
+  if(cleancur){
+    dirnm <- list.files(paste0(dirname(out),"/figures"),full.names = TRUE)
+    dirnm <- dirnm[grepl(paste0("^",basename(tools::file_path_sans_ext(out)),"[[:digit:]]{3}\\.",outfmt),basename(dirnm))]
+    if(length(dirnm)>0) try(file.remove(dirnm),silent=TRUE)
+  }
 
   # Create subfolder to place graphs in
   dir.create(paste(dirname(out),"figures",sep="/"),showWarnings = FALSE)
@@ -78,28 +90,30 @@ ltx_plot <- function(plot,out,title="plot",titlepr=NULL,footnote="",lwidth=NULL,
   # Multiple plots are implemented where the caption and bookmarks are not repeated.
   # However if a titlepr is provided, the caption is repeated with ",cont'd" and not added to lof
   # This strategy was chosen as the default behaviour is to increment number the caption
-  numplots <-  list.files(paste0(dirname(out),"/figures/"),pattern=paste0(sub("\\.tex$","",basename(out)),"...\\.",outfmt))
+  numplots <-  list.files(paste0(dirname(out),"/figures/"),pattern=paste0("^",tools::file_path_sans_ext(basename(out)),"[[:digit:]]{3}\\.",outfmt))
   plt  <- NULL
   for(i in 1:length(numplots)){
     if(!missing(titlepr))  plt <- c(plt,paste0("\\renewcommand{\\figurename}{} \\renewcommand\\thefigure{{",titlepr,"}}"))
-    plt <- c(plt,paste0("\\lfoot{\\footnotesize ",footnote,"}"))
-    plt  <- c(plt,"\\begin{figure}[H]")
+    if(footnote!="")  plt <- c(plt,paste0("\\lfoot{\\footnotesize ",footnote,"}"))
+    plt  <- c(plt,ifelse(rotate,"\\begin{sidewaysfigure}",""),"\\begin{figure}[H]")
     if(hyper & !missing(titlepr) & i==1) plt <- c(plt,paste0("\\hypertarget{",title,"}{} \\bookmark[dest=",title,",level=0]{",titlepr,": ",title,"}"))
     if(hyper & missing(titlepr) & i==1)  plt <- c(plt,paste0("\\hypertarget{",title,"}{} \\bookmark[dest=",title,",level=0]{",title,"}"))
     if(i==1) {
-      plt  <- c(plt,paste0("\\caption{",title,"}"))
+      labdef  <- ifelse(is.null(label),"",paste0("\\label{",label,"}"))
+      capt    <- paste0("\\caption{",title,"}",labdef)
     }else{
-      if(!missing(titlepr)) plt  <- c(plt,paste0("\\caption[]{",title,", cont'd}"))
+      if(!missing(titlepr)) {capt  <- paste0("\\caption[]{",title,", cont'd}")}else{capt <- ""}
     }
+    if(captpl=="top") plt <- c(plt,capt)
     if(is.null(lwidth)){
       plt  <- c(plt,paste0("\\includegraphics{{\"figures/",paste0(sub("\\.tex$","",basename(out)),formatC(i,width=3,flag="0"),"\"}.",outfmt),"}\\\\"))
     }else{
       plt  <- c(plt,paste0("\\includegraphics[width=",lwidth,"]{{\"figures/",paste0(sub("\\.tex$","",basename(out)),formatC(i,width=3,flag="0"),"\"}.",outfmt),"}\\\\"))
     }
-
-    plt  <- c(plt,paste0("\\end{figure}",ifelse(linebreak,"\\clearpage","")))
+    if(captpl=="bottom") plt <- c(plt,capt)
+    plt  <- c(plt,paste0("\\end{figure}",ifelse(rotate,"\\end{sidewaysfigure}",""),ifelse(linebreak,"\\clearpage","")))
   }
-
+  plt <- c(plt,plotnote)
   # Print the plot
   ltx_doc(text=plt,out=out,...)
   if(!is.null(rawout) & !dir.exists(dirname(rawout))){

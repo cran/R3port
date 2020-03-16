@@ -34,7 +34,11 @@
 #'
 #' }
 
-ltx_doc <- function(text,out=NULL,template=paste0(system.file(package="R3port"),"/simple.tex"),rendlist,orientation="landscape",rtitle="report",compile=TRUE,show=TRUE){
+ltx_doc <- function(text,out=NULL,template=paste0(system.file(package="R3port"),"/simple.tex"),
+                    rendlist,orientation="landscape",rtitle="report",compile=TRUE,show=TRUE){
+
+  curwd <- getwd()
+  on.exit(setwd(curwd))
   if(!is.null(out) && !dir.exists(dirname(out))){
     succ <- try(dir.create(dirname(out),showWarnings = FALSE))
     if(!succ) stop("Output folder cannot be created")
@@ -61,29 +65,27 @@ ltx_doc <- function(text,out=NULL,template=paste0(system.file(package="R3port"),
   if(is.null(out)) out <- stdout()
   writeLines(whisker::whisker.render(lout, rendlist), out)
 
-  # compile and show document
-  curwd <- getwd()
-  if(out!=stdout()){
+  if(compile & out!=stdout()){
+    # wd is set to overcome pdflatex compilation issues (as seen with references to relative paths)
     try(setwd(dirname(out)))
     out <- basename(out)
-  }
-  if(compile & out!=stdout()){
-    # compilation on linux with space in path is not handled well by texi2dvi
-    if(Sys.info()['sysname']=="Linux" && grepl(" ",getwd())){
-      try(system(paste("pdflatex",out),ignore.stdout=TRUE))
-      try(system(paste("pdflatex",out),ignore.stdout=TRUE))
-    }else{
-      try(tools::texi2dvi(out,pdf=TRUE,clean=TRUE))
+    if(file.exists(sub("\\.tex$","\\.pdf",out))){
+      chk <- suppressWarnings(file.remove(sub("\\.tex$","\\.pdf",out)))
+      if(!chk) stop("Could not create PDF (check if PDF is open)")
+    }
+    tinytex::pdflatex(out)
+    if(show){
+      if(Sys.info()['sysname']=="Darwin"){
+        try(system(paste0("open \"",sub("\\.tex$","\\.pdf",out),"\""),wait=FALSE))
+      }else if(Sys.info()['sysname']=="Linux"){
+        if(any(grepl("error",suppressWarnings(try(system("xdg-open",intern=TRUE,ignore.stdout=FALSE)))))){
+          try(utils::browseURL(paste0("file://",normalizePath(sub("\\.tex$","\\.pdf",out)))))
+        }else{
+          try(system(paste0("xdg-open '",sub("\\.tex$","\\.pdf",out),"'")))
+        }
+      }else if(Sys.info()['sysname']=="Windows"){
+        try(shell(paste0("\"",sub("\\.tex$","\\.pdf",out),"\""),wait=FALSE))
+      }
     }
   }
-  if(show & out!=stdout()){
-    if(Sys.info()['sysname']=="Darwin"){
-      try(system(paste0("open \"",sub("\\.tex$","\\.pdf",out),"\""),wait=FALSE))
-    }else if(Sys.info()['sysname']=="Linux"){
-      try(system(paste0("xdg-open '",sub("\\.tex$","\\.pdf",out),"'")))
-    }else if(Sys.info()['sysname']=="Windows"){
-      try(shell(paste0("\"",sub("\\.tex$","\\.pdf",out),"\""),wait=FALSE))
-    }
-  }
-  setwd(curwd)
 }
