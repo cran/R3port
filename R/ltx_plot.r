@@ -6,6 +6,7 @@
 #' @param plot plot object or function call that creates plot to be printed to file
 #' @param out filename for the output latex file
 #' @param title character string to define the title of the plot which will be added to the caption
+#' @param shorttitle character string to define the title in a shorter version of the plot which will be used in the TOF in a latex document
 #' @param titlepr character string to define the prefix of the title. Can be used to create custom numbering
 #' @param footnote character string with the footnote to be placed in the footer of the page (LaTeX coding can be used for example to create line breaks)
 #' @param plotnote character string with the plot note to be placed directly below the plot (LaTeX coding can be used for example to create line breaks)
@@ -25,7 +26,7 @@
 #' @param rotate logical indicating if the resulting figure should be rotated 90 degrees clockwise
 #' @param cleancur logical indicating if the available plots should be deleted before creating new ones
 #' @param titlesub character string to define the subtext after title in footnotesize
-#' @param ... additional arguments passed through to \code{\link{ltx_doc}}. Most important are template, rendlist, compile and show
+#' @param ... additional arguments passed through to [ltx_doc()]. Most important are template, rendlist, compile and show
 #'
 #' @return The function returns a latex file (or writes output to console)
 #'
@@ -36,7 +37,7 @@
 #' \dontrun{
 #'   data(Theoph)
 #'   library(ggplot2)
-#'   pl <- qplot(Time, conc, data=Theoph, facets=~Subject,geom="line")
+#'   pl <- ggplot(Theoph,aes(Time,conc)) + geom_line() + facet_wrap(~Subject)
 #'   ltx_plot(pl,out=tempfile(fileext=".tex"))
 #'
 #'   # Base plots work a bit different and can be placed
@@ -50,8 +51,8 @@
 #'   ltx_plot(plot(rnorm(1e6)),out=tempfile(fileext=".tex"),
 #'            outfmt="png",pwidth=2000,pheight=1200)
 #' }
-ltx_plot <- function(plot,out,title="plot",titlepr=NULL,footnote="",plotnote="",lwidth=NULL,pwidth=10,pheight=5.5,res=NULL,hyper=TRUE,outfmt="pdf",
-                     fontsize=12,units="px",rawout=paste0(out,".rawtex"),linebreak=TRUE,label=NULL,captpl="top",rotate=FALSE,cleancur=FALSE,titlesub=NULL,...){
+ltx_plot <- function(plot,out,title="plot", titlepr=NULL,footnote="",plotnote="",lwidth=NULL,pwidth=10,pheight=5.5,res=NULL,hyper=TRUE,outfmt="pdf",
+                     fontsize=12,units="px",rawout=paste0(out,".rawtex"),linebreak=TRUE,label=NULL,captpl="top",rotate=FALSE,cleancur=FALSE,titlesub=NULL, shorttitle = NULL, ...){
   if(is.null(out)|out=="") stop("A valid name for the output should be specified")
 
   # Set logics for option system
@@ -66,7 +67,7 @@ ltx_plot <- function(plot,out,title="plot",titlepr=NULL,footnote="",plotnote="",
   }
 
   # Create subfolder to place graphs in
-  dir.create(paste(dirname(out),"figures",sep="/"),showWarnings = FALSE)
+  dir.create(paste(dirname(out),"figures",sep="/"),showWarnings = FALSE, recursive = TRUE)
 
   # Save plot to location.
   prpl <- function(){
@@ -100,13 +101,13 @@ ltx_plot <- function(plot,out,title="plot",titlepr=NULL,footnote="",plotnote="",
     if(hyper & !missing(titlepr) & i==1) plt <- c(plt,paste0("\\hypertarget{",title,"}{} \\bookmark[dest=",title,",level=0]{",titlepr,": ",title,"}"))
     if(hyper & missing(titlepr) & i==1)  plt <- c(plt,paste0("\\hypertarget{",title,"}{} \\bookmark[dest=",title,",level=0]{",title,"}"))
     subdef  <- ifelse(is.null(titlesub),"",paste0("\\footnotesize{",titlesub,"}"))
-    if(i==1) {
-      labdef  <- ifelse(is.null(label),"",paste0("\\label{",label,"}"))
-      capt    <- paste0("\\caption[",title,"]{",title," ",subdef,"}",labdef)
-    }else{
-      #if(!missing(titlepr)) {capt  <- paste0("\\caption[]{",title,", cont'd}"," ",subdef)}else{capt <- ""}
-      capt  <- paste0("\\caption[]{",title,", cont'd ",subdef,"}")
+    if (i == 1) {
+      labdef <- ifelse(is.null(label), "", paste0("\\label{",label, "}"))
+      capt   <- paste0("\\caption[", shorttitle, "]{", title, "} ", subdef ," ",labdef)
     }
+    else {
+       capt <- paste0("\\captionsetup{list=no} \\ContinuedFloat \\caption[]{", title, ", cont'd}", subdef)
+    } 
     if(captpl=="top") plt <- c(plt,capt)
     if(is.null(lwidth)){
       plt  <- c(plt,paste0("\\includegraphics{{\"figures/",paste0(sub("\\.tex$","",basename(out)),formatC(i,width=3,flag="0"),"\"}.",outfmt),"}\\\\"))
@@ -118,10 +119,10 @@ ltx_plot <- function(plot,out,title="plot",titlepr=NULL,footnote="",plotnote="",
   }
   plt <- c(plt,plotnote)
   # Print the plot
-  ltx_doc(text=plt,out=out,...)
   if(!is.null(rawout) & !dir.exists(dirname(rawout))){
     succ <- try(dir.create(dirname(rawout),showWarnings = FALSE))
     if(!succ) stop("Output folder for raw files cannot be created")
   }
   if(!is.null(rawout)) cat(plt,sep="\n",file=rawout)
+  ltx_doc(text=plt,out=out,...)
 }

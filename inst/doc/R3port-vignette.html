@@ -12,7 +12,7 @@
 
 <meta name="author" content="Richard Hooijmaijers" />
 
-<meta name="date" content="2023-09-22" />
+<meta name="date" content="2025-05-12" />
 
 <title>Introduction to the R3port package</title>
 
@@ -51,7 +51,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -62,7 +62,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -340,7 +340,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Introduction to the R3port package</h1>
 <h4 class="author">Richard Hooijmaijers</h4>
-<h4 class="date">2023-09-22</h4>
+<h4 class="date">2025-05-12</h4>
 
 
 
@@ -415,7 +415,7 @@ statistics frequently used in reporting clinical results. Also it places
 the results in a long format data frame (for easy processing in the
 other functions). There are some options for calculation of totals and
 number of digits in output but mainly it uses plyr to do the work. For
-this reason a predefined set of statisitcs was chosen as it is quite
+this reason a predefined set of statistics was chosen as it is quite
 easy to calculate other statistics just using plyr.</p>
 <p>Using a similar function, the frequencies within a data frame can be
 calculated. Let’s say we want to know the frequencies of each gender,
@@ -601,7 +601,7 @@ of background on how these functions work we should first look at all
 the output that is created. For each table and listing, by default 3
 files are generated. For latex output, the tex file, compiled pdf and a
 raw tex file. For html only a html and raw html file. In case of
-plotting also a figures folder is created with teh plots. The raw files
+plotting also a figures folder is created with the plots. The raw files
 have only the text/coding for the table or listing. The combine
 functions can pick these files up and place it in a combined document.
 The combine argument can be used to select files, for instance if you
@@ -618,7 +618,7 @@ want to combine a selected set of output.</p>
 layout. This is controlled by the templates, I didn’t explain the
 template argument before because I think it deserves a section of it’s
 own. The template system uses <code>whisker</code> to create output in
-different styes. A couple of templates are included within the package
+different styles. A couple of templates are included within the package
 to start with, however users can generate their own templates using this
 system. The whisker package is set up to provide a template and a list
 with variables to render (called rendlist in this package). Provide a
