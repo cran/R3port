@@ -1,6 +1,6 @@
-5fa68a3327f3b90532ae96635ff69cd4 *DESCRIPTION
+cc6cf7a99cd16d3e1270bbd701cbc7c5 *DESCRIPTION
 65ab0d967f5ce0c5fed21f527226be72 *NAMESPACE
-bb45bbfbd287eddce2693b9b2dd239dc *NEWS.md
+d038f953bea18e59acb1ffd1c0fc1be3 *NEWS.md
 0f522ce5856599ccf95228c5bde2b025 *R/R3port-package.r
 dd435ec87c160ad63160b9a733461ca5 *R/freq.r
 8cab9e131505660c639f414b6cb7034e *R/html_combine.r
@@ -24,7 +24,7 @@ a4db99b74ae25037741f6f887d221256 *inst/bootstrap.html
 b230dda53a7e01dcddc415334ace8507 *inst/default.tex
 8eb8806b2cd415e55f04f3af0f58e78c *inst/doc/R3port-vignette.R
 8beb99d1bc1833fb725311cd9af5e731 *inst/doc/R3port-vignette.Rmd
-89a8949c989ac2122a39a67f0c096126 *inst/doc/R3port-vignette.html
+c4465aa1344b6b194ff147f2c8fbc557 *inst/doc/R3port-vignette.html
 46324a5c3ad6871c02d6946b4fcc223d *inst/listing.tex
 a200d885ba6a34fdcb463e54561067ed *inst/listing_full.tex
 dfa6d332b2145d4d35d5d66c952bd769 *inst/simple.html
@@ -51,7 +51,7 @@ ce41836fc9c50018b70b0e04b7dc0ca7 *man/ltx_table.Rd
 49320d67d16803512785594218e44820 *man/means.Rd
 09c8352a289dda6ebaa99ef72b25fcd9 *man/table_prep.Rd
 b7582b26699ec551502046f6fc577a44 *tests/testthat.R
-6dc3501e4b15f61bf52cdaedddbcf019 *tests/testthat/test_freq.R
+6b89b0bbeba30b7a24629eb3897ebb48 *tests/testthat/test_freq.R
 c1ee5563cf9e212daff984a4cf799d3b *tests/testthat/test_htmlfun.R
 d754acb5a7fbf1240c18c3359d611706 *tests/testthat/test_ltxfun.R
 d94ca25d814ae4b9d0854da3e8f641c3 *tests/testthat/test_means.R
